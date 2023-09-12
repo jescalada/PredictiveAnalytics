@@ -1,0 +1,21 @@
+import matplotlib.pyplot as plt
+
+years       = [2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018]
+colorado    = [5029196,5029316,5048281,5121771,5193721,5270482,5351218,5452107,
+               5540921,5615902,5695564]
+connecticut = [3574097,3574147,3579125,3588023,3594395,3594915,3594783,3587509,
+               3578674,3573880,3572665]
+
+# red dashes, blue squares and green triangles
+plt.plot(years, colorado, "--", color='red', label="Colorado")
+plt.plot(years,connecticut, "s", color='blue', label="Connecticut")
+
+# legend
+# https://matplotlib.org/users/legend_guide.html
+plt.ylim(ymin=0)  # Set's y axis start to 0.
+plt.legend(loc=0)
+plt.xlabel("Year")
+plt.ylabel("Population")
+plt.title('Population by State')
+
+plt.show()
