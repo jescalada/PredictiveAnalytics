@@ -1,7 +1,10 @@
 import pandas as pd
+import os
 
 # Import data into a DataFrame.
-path = "C:\\Users\\juane\\Desktop\\Juan\\Predictive\\bodyfat.txt"
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATASET_DIR = f"{ROOT_DIR}\\..\\datasets\\"
+path = f"{DATASET_DIR}\\bodyfat.txt"
 
 df = pd.read_table(path, skiprows=1,
                    delim_whitespace=True,
@@ -40,7 +43,7 @@ print(df_small.head(4))
 
 
 # Import data into a DataFrame.
-path = "C:\\Users\\juane\\Desktop\\Juan\\Predictive\\babysamp-98.txt"
+path = f"{DATASET_DIR}\\babysamp-98.txt"
 df = pd.read_csv(path, skiprows=1,
                    sep='\t',
                    names=('MomAge', 'DadAge', 'MomEduc', 'MomMarital', 'numlive',
@@ -120,11 +123,10 @@ print("---------------------------------")
 # Exercise 17
 
 # The data file path and file name need to be configured.
-PATH = "C:\\Users\\juane\\Desktop\\Juan\\Predictive\\"
 CSV_DATA = "phone_data.csv"
 
 # Note this has a comma separator.
-df = pd.read_csv(PATH + CSV_DATA, skiprows=1, encoding="ISO-8859-1", sep=',',
+df = pd.read_csv(DATASET_DIR + CSV_DATA, skiprows=1, encoding="ISO-8859-1", sep=',',
                  names=('index', 'date', 'duration', 'item', 'month', 'network',
                         'network_type'))
 # Get count of items per month.
@@ -165,7 +167,7 @@ print(dfStats)
 print("---------------------------------")
 
 # Note this has a comma separator.
-df = pd.read_csv(PATH + CSV_DATA, skiprows=1, encoding="ISO-8859-1", sep=',',
+df = pd.read_csv(DATASET_DIR + CSV_DATA, skiprows=1, encoding="ISO-8859-1", sep=',',
                  names=('index', 'date', 'duration', 'item', 'month', 'network',
                         'network_type'))
 # Get count of items per month.
@@ -246,7 +248,7 @@ print(df)
 print("---------------------------------")
 # Exercise 21
 
-df = pd.read_csv(PATH + CSV_DATA, skiprows=1,  encoding = "ISO-8859-1", sep=',',
+df = pd.read_csv(DATASET_DIR + CSV_DATA, skiprows=1,  encoding = "ISO-8859-1", sep=',',
                  names=('index', 'date', 'duration', 'item', 'month','network',
                         'network_type' ))
 
