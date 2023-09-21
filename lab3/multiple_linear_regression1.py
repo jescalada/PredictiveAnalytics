@@ -4,6 +4,7 @@ import statsmodels.api as sm
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 import os
+import matplotlib.pyplot as plt
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = f"{ROOT_PATH}\\..\\datasets\\"
@@ -41,3 +42,49 @@ predictions = model.predict(X_test)  # make the predictions by the model
 print(model.summary())
 
 print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, predictions)))
+
+def plotPredictionVsActual(plt, title, y_test, predictions):
+    plt.scatter(y_test, predictions)
+    plt.legend()
+    plt.xlabel("Actual")
+    plt.ylabel("Predicted")
+    plt.title('Predicted (Y) vs. Actual (X): ' + title)
+    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--')
+
+
+def plotResidualsVsActual(plt, title, y_test, predictions):
+    residuals = y_test - predictions
+    plt.scatter(y_test, residuals, label='Residuals vs Actual')
+    plt.xlabel("Actual")
+    plt.ylabel("Residual")
+    plt.title('Error Residuals (Y) vs. Actual (X): ' + title)
+    plt.plot([y_test.min(), y_test.max()], [0, 0], 'k--')
+
+
+def plotResidualHistogram(plt, title, y_test, predictions, bins):
+    residuals = y_test - predictions
+    plt.xlabel("Residual")
+    plt.ylabel("Frequency")
+    plt.hist(residuals, label='Residuals vs Actual', bins=bins)
+    plt.title('Error Residual Frequency: ' + title)
+    plt.plot()
+
+
+def drawValidationPlots(title, bins, y_test, predictions):
+    # Define number of rows and columns for graph display.
+    plt.subplots(nrows=1, ncols=3, figsize=(12, 5))
+
+    plt.subplot(1, 3, 1)  # Specfy total rows, columns and image #
+    plotPredictionVsActual(plt, title, y_test, predictions)
+
+    plt.subplot(1, 3, 2)  # Specfy total rows, columns and image #
+    plotResidualsVsActual(plt, title, y_test, predictions)
+
+    plt.subplot(1, 3, 3)  # Specfy total rows, columns and image #
+    plotResidualHistogram(plt, title, y_test, predictions, bins)
+    plt.show()
+
+
+BINS = 8
+TITLE = "Wine Quality"
+drawValidationPlots(TITLE, BINS, y_test, predictions)
