@@ -38,8 +38,53 @@ def perform_analysis(X, y, test_size=0.2, model_name=""):
     print(model.summary())
     print(f'{model_name} RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predictions)))
     plot_predicted_vs_actual(y_test, predictions, model_name)
+    BINS = 50
+    drawValidationPlots(model_name, BINS, y_test, predictions)
 
     return predictions, model
+
+
+
+def plotPredictionVsActual(plt, title, y_test, predictions):
+    plt.scatter(y_test, predictions)
+    plt.legend()
+    plt.xlabel("Actual")
+    plt.ylabel("Predicted")
+    plt.title('Predicted (Y) vs. Actual (X): ' + title)
+    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--')
+
+
+def plotResidualsVsActual(plt, title, y_test, predictions):
+    residuals = y_test - predictions
+    plt.scatter(y_test, residuals, label='Residuals vs Actual')
+    plt.xlabel("Actual")
+    plt.ylabel("Residual")
+    plt.title('Error Residuals (Y) vs. Actual (X): ' + title)
+    plt.plot([y_test.min(), y_test.max()], [0, 0], 'k--')
+
+
+def plotResidualHistogram(plt, title, y_test, predictions, bins):
+    residuals = y_test - predictions
+    plt.xlabel("Residual")
+    plt.ylabel("Frequency")
+    plt.hist(residuals, label='Residuals vs Actual', bins=bins)
+    plt.title('Error Residual Frequency: ' + title)
+    plt.plot()
+
+
+def drawValidationPlots(title, bins, y_test, predictions):
+    # Define number of rows and columns for graph display.
+    plt.subplots(nrows=1, ncols=3, figsize=(12, 5))
+
+    plt.subplot(1, 3, 1)  # Specfy total rows, columns and image #
+    plotPredictionVsActual(plt, title, y_test, predictions)
+
+    plt.subplot(1, 3, 2)  # Specfy total rows, columns and image #
+    plotResidualsVsActual(plt, title, y_test, predictions)
+
+    plt.subplot(1, 3, 3)  # Specfy total rows, columns and image #
+    plotResidualHistogram(plt, title, y_test, predictions, bins)
+    plt.show()
 
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -98,6 +143,7 @@ y = dataset['Price'].values
 
 perform_analysis(X, y, test_size=0.1, model_name="No Bedrooms Model")
 
+
 # MODEL 3
 # Remove Avg. Area Number of Rooms
 X_no_rooms = dataset[['Avg. Area Income', 'Avg. Area House Age', 'Area Population']]
@@ -105,3 +151,6 @@ X = sm.add_constant(X_no_rooms)
 y = dataset['Price'].values
 
 perform_analysis(X, y, test_size=0.1, model_name="No Rooms Model")
+
+# Get three random samples from the dataset
+print(dataset.sample(n=3))
