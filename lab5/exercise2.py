@@ -65,3 +65,23 @@ accuracy = (confusion_matrix[0][0] + confusion_matrix[1][1]) / \
            (confusion_matrix[0][0] + confusion_matrix[0][1] +
             confusion_matrix[1][0] + confusion_matrix[1][1])
 print(f'Accuracy: {accuracy}')
+
+TN = confusion_matrix[0][0]
+FN = confusion_matrix[0][1]
+FP = confusion_matrix[1][0]
+TP = confusion_matrix[1][1]
+
+print("")
+print("True Negative:  " + str(TN))
+print("False Negative: " + str(FN))
+print("False Positive: " + str(FP))
+print("True Positive:  " + str(TP))
+
+precision = (TP/(FP + TP))
+print("\nPrecision:  " + str(round(precision, 3)))
+
+recall = (TP/(TP + FN))
+print("Recall:     " + str(round(recall,3)))
+
+F1 = 2*((precision*recall)/(precision+recall))
+print("F1:         " + str(round(F1,3)))
