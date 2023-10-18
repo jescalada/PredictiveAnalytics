@@ -30,6 +30,7 @@ rfe = RFE(model, n_features_to_select=8)
 # fit the model
 rfe = rfe.fit(X, y)
 
+
 def build_and_evaluate_classifier(features, X, y):
     # Re-assign X with significant columns only after chi-square test.
     X = X[features]
