@@ -119,35 +119,35 @@ evaluate_model(X_test, y_test, y_train, clf, "After SCUT")
 # Perform logistic regression with SCUT-treated train data and MinMaxScaler
 
 from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
+minmax_scaler = MinMaxScaler()
 
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+X_train_scaled_minmax = minmax_scaler.fit_transform(X_train)
+X_test_scaled_minmax = minmax_scaler.transform(X_test)
 
 clf = LogisticRegression(solver='newton-cg', max_iter=1000)
-clf.fit(X_train_scaled, y_train)
-evaluate_model(X_test_scaled, y_test, y_train, clf, "After SCUT and MinMaxScaler")
+clf.fit(X_train_scaled_minmax, y_train)
+evaluate_model(X_test_scaled_minmax, y_test, y_train, clf, "After SCUT and MinMaxScaler")
 
 # Perform logistic regression with SCUT-treated train data and StandardScaler
 
 from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
+standard_scaler = StandardScaler()
 
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+X_train_scaled_standard = standard_scaler.fit_transform(X_train)
+X_test_scaled_standard = standard_scaler.transform(X_test)
 
 clf = LogisticRegression(solver='newton-cg', max_iter=1000)
-clf.fit(X_train_scaled, y_train)
-evaluate_model(X_test_scaled, y_test, y_train, clf, "After SCUT and StandardScaler")
+clf.fit(X_train_scaled_standard, y_train)
+evaluate_model(X_test_scaled_standard, y_test, y_train, clf, "After SCUT and StandardScaler")
 
 # Perform logistic regression with SCUT-treated train data and RobustScaler
 
 from sklearn.preprocessing import RobustScaler
-scaler = RobustScaler()
+robust_scaler = RobustScaler()
 
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+X_train_scaled_robust = robust_scaler.fit_transform(X_train)
+X_test_scaled_robust = robust_scaler.transform(X_test)
 
 clf = LogisticRegression(solver='newton-cg', max_iter=1000)
-clf.fit(X_train_scaled, y_train)
-evaluate_model(X_test_scaled, y_test, y_train, clf, "After SCUT and RobustScaler")
+clf.fit(X_train_scaled_robust, y_train)
+evaluate_model(X_test_scaled_robust, y_test, y_train, clf, "After SCUT and RobustScaler")
