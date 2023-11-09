@@ -85,3 +85,26 @@ def plot_residuals_vs_actual(best_model, x_test, y_test, title):
     plt.plot([y_test.min(), y_test.max()], [0, 0], 'k--')
     plt.tight_layout()
     plt.show()
+
+def get_text_equation(best_model):
+    equation = "Loan Sanction Amount (USD) = "
+    for x, y in dict(best_model.params).items():
+        if x == 'const':
+            equation += str(round(y, 4))
+        else:
+            equation += " + " + str(round(y, 4)) + " * " + x
+    return equation
+
+def get_python_equation(best_model):
+    python_equation = "return "
+    for x, y in dict(best_model.params).items():
+        if x == 'const':
+            # Add sign to constant
+            python_equation += str(round(y, 4)) if y < 0 else "+" + str(round(y, 4))
+        else:
+            # Convert variable names to snake case
+            x = x.replace(" ", "_")
+            x = x.replace("(", "")
+            x = x.replace(")", "")
+            python_equation += " + " + str(round(y, 4)) + " * " + x
+    return python_equation
