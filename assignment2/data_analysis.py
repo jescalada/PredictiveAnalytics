@@ -1,6 +1,11 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import statsmodels.tools
+from sklearn.impute import KNNImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, roc_auc_score
+from sklearn.model_selection import train_test_split, cross_val_score
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 DATASET_DIR = "\\..\\datasets\\"
@@ -18,128 +23,84 @@ pd.set_option('display.width', 1000)
 print(dataframe.head())
 print(dataframe.describe())
 
-# Plot a boxplot for AccountAge grouped by Churn
-dataframe.boxplot(column='AccountAge', by='Churn')
-plt.ylim(0, 125)
-plt.show()
-
-# Plot a boxplot for MonthlyCharges grouped by Churn
-dataframe.boxplot(column='MonthlyCharges', by='Churn')
-plt.ylim(0, 20)
-plt.show()
-
-# Plot a boxplot for TotalCharges grouped by Churn
-dataframe.boxplot(column='TotalCharges', by='Churn')
-plt.ylim(0, 2500)
-plt.show()
-
-# Compare churn rates according to GenrePreference
-y_values = dataframe.groupby('GenrePreference')['Churn'].mean().map(lambda x: x * 100)
-dataframe.groupby('GenrePreference')['Churn'].mean().map(lambda x: x * 100).plot(
-    kind='bar',
-    rot=0,
-    title='Churn Rates by Genre Preference',
-    xlabel='Genre Preference',
-    ylabel='Churn Rate (%)',
-    yticks=range(0, 24, 2),
-    figsize=(8, 4),
-    grid=True
-)
-for i in range(5):
-    plt.text(i, round(y_values[i], 2), round(y_values[i], 2), color='white', ha='center', bbox=dict(facecolor='black'))
-plt.show()
-
-# Compare churn rates according to PaymentMethod
-y_values = dataframe.groupby('PaymentMethod')['Churn'].mean().map(lambda x: x * 100)
-dataframe.groupby('PaymentMethod')['Churn'].mean().map(lambda x: x * 100).plot(
-    kind='bar',
-    rot=0,
-    title='Churn Rates by Payment Method',
-    xlabel='Payment Method',
-    ylabel='Churn Rate (%)',
-    yticks=range(0, 24, 2),
-    figsize=(8, 4),
-    grid=True
-)
-for i in range(4):
-    plt.text(i, round(y_values[i], 2), round(y_values[i], 2), color='white', ha='center', bbox=dict(facecolor='black'))
-plt.show()
-
-# Compare churn rates according to MultiDeviceAccess and DeviceRegistered
-y_values = dataframe.groupby(['MultiDeviceAccess', 'DeviceRegistered'])['Churn'].mean().map(lambda x: x * 100)
-dataframe.groupby(['MultiDeviceAccess', 'DeviceRegistered'])['Churn'].mean().map(lambda x: x * 100).plot(
-    kind='bar',
-    rot=0,
-    title='Churn Rates by Multi-Device Access and Device Registered',
-    xlabel='(Multi-Device, Type of Device)',
-    ylabel='Churn Rate (%)',
-    yticks=range(0, 24, 2),
-    figsize=(12, 4),
-    grid=True
-)
-for i in range(8):
-    plt.text(i, round(y_values[i], 2), round(y_values[i], 2), color='white', ha='center', bbox=dict(facecolor='black'))
-plt.show()
-
-# Make a scatterplot of MonthlyCharges vs. TotalCharges and color by Churn
-# Get a random sample of 1000 data points
-# Make the data points small
-sample = dataframe.sample(n=10000)
-sample.plot(
-    kind='scatter',
-    x='MonthlyCharges',
-    y='TotalCharges',
-    c='Churn',
-    colormap='winter',
-    title='Monthly Charges vs. Total Charges',
-    xlabel='Monthly Charges',
-    ylabel='Total Charges',
-    figsize=(8, 4),
-    grid=True,
-    s=0.5
-)
-plt.show()
-
-# Count the missing values in each column
-print(dataframe.isnull().sum())
-
 # Replace missing values in AccountAge with the mean
 dataframe['AccountAge'].fillna(dataframe['AccountAge'].mean(), inplace=True)
 
-# Bin the AccountAge column into 12 bins of width 10
-dataframe['AccountAgeBins'] = pd.cut(dataframe['AccountAge'], bins=12, labels=False)
+# Replace missing values in ViewingHoursPerWeek with the mean
+dataframe['ViewingHoursPerWeek'].fillna(dataframe['ViewingHoursPerWeek'].mean(), inplace=True)
+
+# Replace missing values in AverageViewingDuration with the mean
+dataframe['AverageViewingDuration'].fillna(dataframe['AverageViewingDuration'].mean(), inplace=True)
+
+# # Bin the AccountAge column into 10 bins of width 10
+dataframe['AccountAgeBins'] = pd.cut(dataframe['AccountAge'], bins=10, labels=False)
+# print(dataframe.head())
+#
+# # Bin the UserRating column into 4 bins of width 1
+dataframe['UserRatingBins'] = pd.cut(dataframe['UserRating'], bins=4)
+
+# Make a simple Logistic Regression model
+# Impute missing numeric values using KNNImputer
+imputer = KNNImputer(n_neighbors=5)
+
+
+# Add dummies for categorical columns
+dataframe = dataframe.drop(columns=['CustomerID'])
+dataframe = pd.get_dummies(dataframe, columns=['SubscriptionType', 'PaymentMethod', 'PaperlessBilling', 'ContentType',
+                                               'MultiDeviceAccess', 'DeviceRegistered', 'GenrePreference', 'Gender',
+                                               'ParentalControl', 'SubtitlesEnabled', 'AccountAgeBins', 'UserRatingBins'])
+
+# replace NaN values with the mean of the 5 nearest neighbors
+# dataframe = pd.DataFrame(imputer.fit_transform(dataframe), columns=dataframe.columns)
+
 print(dataframe.head())
 
+X = dataframe.copy()
 
-# Compare churn rates according to AccountAgeBins
-y_values = dataframe.groupby('AccountAgeBins')['Churn'].mean().map(lambda x: x * 100)
-dataframe.groupby('AccountAgeBins')['Churn'].mean().map(lambda x: x * 100).plot(
-    kind='bar',
-    rot=0,
-    title='Churn Rates by Account Age in Years',
-    xlabel='Account Age (Years)',
-    ylabel='Churn Rate (%)',
-    yticks=range(0, 34, 2),
-    figsize=(10, 4),
-    grid=True
-)
-for i in range(12):
-    plt.text(i, round(y_values[i], 2), round(y_values[i], 2), color='white', ha='center', bbox=dict(facecolor='black', alpha=0.6))
-plt.show()
+statsmodels.tools.add_constant(X)
 
-# Compare churn rates according to SubscriptionType and ContentType
-y_values = dataframe.groupby(['SubscriptionType', 'ContentType'])['Churn'].mean().map(lambda x: x * 100)
-dataframe.groupby(['SubscriptionType', 'ContentType'])['Churn'].mean().map(lambda x: x * 100).plot(
-    kind='bar',
-    rot=0,
-    title='Churn Rates by Subscription Type and Content Type',
-    xlabel='(Subscription Type, Content Type)',
-    ylabel='Churn Rate (%)',
-    yticks=range(0, 34, 2),
-    figsize=(14, 4),
-    fontsize=8,
-    grid=True
+# Remove the target column from the dataframe
+X.drop(columns=['Churn'], inplace=True)
+
+y = dataframe['Churn']
+
+# Split into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2
 )
-for i in range(9):
-    plt.text(i, round(y_values[i], 2), round(y_values[i], 2), color='white', ha='center', bbox=dict(facecolor='black', alpha=0.6))
-plt.show()
+
+# Create a Logistic Regression model
+model = LogisticRegression(max_iter=1000)
+
+# Fit the model
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+predictions = model.predict(X_test)
+
+# Calculate the accuracy score on the test set
+print("Accuracy score: ")
+print(accuracy_score(y_test, predictions))
+
+# Calculate the precision
+print("Precision: ")
+print(precision_score(y_test, predictions))
+
+# Calculate ROC
+roc = roc_auc_score(y_test, predictions)
+print("ROC: ")
+print(roc)
+
+# Print the confusion matrix
+print("Confusion matrix: ")
+print(confusion_matrix(y_test, predictions))
+
+# Print the F1 score
+print("F1 score: ")
+print(f1_score(y_test, predictions))
+
+# Perform cross-validation
+# scores = cross_val_score(model, X, y, cv=5)
+# print(scores)
