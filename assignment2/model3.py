@@ -21,6 +21,7 @@ FILE = 'CustomerChurn.csv'
 
 dataframe = pd.read_csv(PATH + FILE)
 
+# TODO: Remove this line
 dataframe = dataframe.sample(20000)
 
 # Show all columns.
@@ -31,10 +32,6 @@ pd.set_option('display.width', 1000)
 
 # Drop ID column.
 dataframe.drop('CustomerID', axis=1, inplace=True)
-
-
-# Keep only the following columns: AccountAge, ViewingHoursPerWeek, GenrePreference and UserRating
-dataframe = dataframe[['AccountAge', 'ViewingHoursPerWeek', 'GenrePreference', 'UserRating', 'Churn']]
 
 ### Impute missing values using random values from a normal distribution ###
 
@@ -51,6 +48,10 @@ account_age_std_not_churned = dataframe[dataframe['Churn'] == 0]['AccountAge'].s
 viewing_hours_per_week_mean = dataframe['ViewingHoursPerWeek'].mean()
 viewing_hours_per_week_std = dataframe['ViewingHoursPerWeek'].std()
 
+# Define AverageViewingDuration mean and standard deviation
+average_viewing_duration_mean = dataframe['AverageViewingDuration'].mean()
+average_viewing_duration_std = dataframe['AverageViewingDuration'].std()
+
 # Iterate through each row and impute missing values
 for index, row in dataframe.iterrows():
     if pd.isnull(row['AccountAge']):
@@ -60,6 +61,9 @@ for index, row in dataframe.iterrows():
             dataframe.at[index, 'AccountAge'] = rng.normal(account_age_mean_not_churned, account_age_std_not_churned)
     if pd.isnull(row['ViewingHoursPerWeek']):
         dataframe.at[index, 'ViewingHoursPerWeek'] = rng.normal(viewing_hours_per_week_mean, viewing_hours_per_week_std)
+    if pd.isnull(row['AverageViewingDuration']):
+        dataframe.at[index, 'AverageViewingDuration'] = rng.normal(average_viewing_duration_mean,
+                                                                   average_viewing_duration_std)
 
 # Bin the AccountAge column into 10 bins of width 10
 dataframe['AccountAgeBins'] = pd.cut(dataframe['AccountAge'], bins=10, labels=False)
@@ -70,17 +74,21 @@ dataframe['UserRating'] = dataframe['UserRating'].round(1)
 # Bin the UserRating column into 4 bins of width 1
 dataframe['UserRatingBins'] = pd.cut(dataframe['UserRating'], bins=4)
 
-
 # Use RobustScaler to scale the numerical columns
 scaler = RobustScaler()
-dataframe[['AccountAge', 'ViewingHoursPerWeek', 'UserRating']] = scaler.fit_transform(
-    dataframe[['AccountAge', 'ViewingHoursPerWeek', 'UserRating']]
-)
+dataframe[['AccountAge', 'MonthlyCharges', 'TotalCharges', 'ViewingHoursPerWeek', 'AverageViewingDuration',
+           'ContentDownloadsPerMonth', 'UserRating', 'SupportTicketsPerMonth', 'WatchlistSize']] = scaler.fit_transform(
+    dataframe[['AccountAge', 'MonthlyCharges', 'TotalCharges', 'ViewingHoursPerWeek', 'AverageViewingDuration',
+               'ContentDownloadsPerMonth', 'UserRating', 'SupportTicketsPerMonth', 'WatchlistSize']])
 print("After scaling:")
 print(dataframe.head())
 
 # Add dummies for categorical columns
-dataframe = pd.get_dummies(dataframe, columns=['GenrePreference', 'AccountAgeBins', 'UserRatingBins'])
+dataframe = pd.get_dummies(dataframe, columns=['SubscriptionType', 'PaymentMethod', 'PaperlessBilling', 'ContentType',
+                                               'MultiDeviceAccess', 'DeviceRegistered', 'GenrePreference', 'Gender',
+                                               'ParentalControl', 'SubtitlesEnabled',
+                                               'AccountAgeBins', 'UserRatingBins'])
+print("After dummies:")
 print(dataframe.head())
 
 X = dataframe.copy()
@@ -89,7 +97,6 @@ statsmodels.tools.add_constant(X)
 
 # Remove the target column from the dataframe
 X.drop(columns=['Churn'], inplace=True)
-
 y = dataframe['Churn']
 
 # Split into training and test sets
@@ -109,12 +116,21 @@ dfTrain['Churn'] = y_train
 
 scut = SCUT(
     k=5,
-    binary_columns=['GenrePreference_Action', 'GenrePreference_Comedy', 'GenrePreference_Drama', 'GenrePreference_Fantasy',
-                            'GenrePreference_Sci-Fi', 'AccountAgeBins_0', 'AccountAgeBins_1',
-                                               'AccountAgeBins_2', 'AccountAgeBins_3', 'AccountAgeBins_4',
-                                               'AccountAgeBins_5', 'AccountAgeBins_6', 'AccountAgeBins_7',
-                                               'AccountAgeBins_8', 'AccountAgeBins_9', 'UserRatingBins_(0.996, 2.0]',
-                                               'UserRatingBins_(2.0, 3.0]', 'UserRatingBins_(3.0, 4.0]', 'UserRatingBins_(4.0, 5.0]', 'Churn']
+    binary_columns=['SubscriptionType_Basic', 'SubscriptionType_Premium', 'SubscriptionType_Standard',
+                    'PaymentMethod_Bank transfer', 'PaymentMethod_Credit card', 'PaymentMethod_Electronic check',
+                    'PaymentMethod_Mailed check', 'PaperlessBilling_No', 'PaperlessBilling_Yes', 'ContentType_Both',
+                    'ContentType_Movies', 'ContentType_TV Shows', 'MultiDeviceAccess_No', 'MultiDeviceAccess_Yes',
+                    'DeviceRegistered_Computer', 'DeviceRegistered_Mobile', 'DeviceRegistered_TV',
+                    'DeviceRegistered_Tablet',
+                    'GenrePreference_Action', 'GenrePreference_Comedy', 'GenrePreference_Drama',
+                    'GenrePreference_Fantasy',
+                    'GenrePreference_Sci-Fi', 'Gender_Female', 'Gender_Male', 'ParentalControl_No',
+                    'ParentalControl_Yes',
+                    'SubtitlesEnabled_No', 'SubtitlesEnabled_Yes', 'AccountAgeBins_0', 'AccountAgeBins_1',
+                    'AccountAgeBins_2', 'AccountAgeBins_3', 'AccountAgeBins_4',
+                    'AccountAgeBins_5', 'AccountAgeBins_6', 'AccountAgeBins_7',
+                    'AccountAgeBins_8', 'AccountAgeBins_9', 'UserRatingBins_(0.996, 2.0]',
+                    'UserRatingBins_(2.0, 3.0]', 'UserRatingBins_(3.0, 4.0]', 'UserRatingBins_(4.0, 5.0]', 'Churn']
 )
 df_scut = scut.balance(dfTrain, 'Churn')
 
@@ -138,12 +154,55 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 y_prob = model.predict_proba(X_test)
 
+for p in np.arange(0.44, 0.68, 0.02):
+    # Compute predictions with a threshold of 0.2
+    y_pred_p = (model.predict_proba(X_test)[:, 1] >= p)
+
+    # Calculate accuracy, precision, recall, and F1 score for the thresholded predictions (p=0.2)
+    print(f"Accuracy (p={p}): ")
+    print(accuracy_score(y_test, y_pred_p))
+
+    print(f"Precision (p={p}): ")
+    print(precision_score(y_test, y_pred_p))
+
+    print(f"Recall (p={p}): ")
+    print(recall_score(y_test, y_pred_p))
+
+    print(f"Confusion matrix (p={p}): ")
+    print(confusion_matrix(y_test, y_pred_p))
+
+    print("==========================")
+    print(f"F1 score (p={p}): ")
+    print(f1_score(y_test, y_pred_p))
+    print("==========================")
+
+# Calculate the accuracy score on the test set
+print("Accuracy (p=0.5): ")
+print(accuracy_score(y_test, y_pred))
+
+# Calculate the precision
+print("Precision (p=0.5): ")
+print(precision_score(y_test, y_pred))
+
+# Calculate the recall
+print("Recall (p=0.5): ")
+print(recall_score(y_test, y_pred))
+
+# Print the confusion matrix
+print("Confusion matrix (p=0.5): ")
+print(confusion_matrix(y_test, y_pred))
+
+# Print the F1 score
+print("==========================")
+print("F1 score (p=0.5): ")
+print(f1_score(y_test, y_pred))
+print("==========================")
 
 # Perform cross-validation
 # scores = cross_val_score(model, X, y, cv=5)
 # print(scores)
 
-auc = roc_auc_score(y_test, y_prob[:, 1],)
+auc = roc_auc_score(y_test, y_prob[:, 1], )
 print('Logistic: ROC AUC=%.3f' % (auc))
 
 # calculate roc curves
@@ -155,8 +214,6 @@ plt.ylabel('True Positive Rate')
 plt.legend()
 plt.show()
 
-end_time = time.perf_counter()
-print(f"Runtime of the program is {end_time - start_time:.3f} seconds")
 
 # Cross-validate the model
 accuracy = cross_val_score(model, X, y, cv=5)
@@ -164,7 +221,11 @@ f1 = cross_val_score(model, X, y, cv=5, scoring='f1')
 precision = cross_val_score(model, X, y, cv=5, scoring='precision')
 recall = cross_val_score(model, X, y, cv=5, scoring='recall')
 
-print(f"Accuracy: {accuracy.mean():.3f} +/- {accuracy.std():.3f}")
-print(f"F1: {f1.mean():.3f} +/- {f1.std():.3f}")
-print(f"Precision: {precision.mean():.3f} +/- {precision.std():.3f}")
-print(f"Recall: {recall.mean():.3f} +/- {recall.std():.3f}")
+print(f"Accuracy: {accuracy.mean():.3f} +/- {accuracy.std():.4f}")
+print(f"F1: {f1.mean():.3f} +/- {f1.std():.4f}")
+print(f"Precision: {precision.mean():.3f} +/- {precision.std():.4f}")
+print(f"Recall: {recall.mean():.3f} +/- {recall.std():.4f}")
+
+
+end_time = time.perf_counter()
+print(f"Runtime of the program is {end_time - start_time:.3f} seconds")
