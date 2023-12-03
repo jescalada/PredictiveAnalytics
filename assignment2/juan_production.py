@@ -32,10 +32,6 @@ def predict(dataframe):
                 dataframe.at[index, 'AverageViewingDuration'] = rng.normal(MEAN_AVERAGE_VIEWING_DURATION_NOT_CHURNED,
                                                                            STD_AVERAGE_VIEWING_DURATION_NOT_CHURNED)
 
-    # Bin the AccountAge column into 10 bins of width 10
-    print("Attempting to bin AccountAge for test_dataframe:")
-    print(f"test_dataframe head: \n{dataframe.head()}")
-    print(f"test_dataframe AccountAge head: \n{dataframe['AccountAge'].head()}")
     dataframe['AccountAgeBins'] = pd.cut(dataframe['AccountAge'], bins=10, labels=False)
 
     # Round user ratings to nearest 0.1
@@ -50,8 +46,6 @@ def predict(dataframe):
                     'ContentDownloadsPerMonth', 'SupportTicketsPerMonth']] = scaler.fit_transform(
         dataframe[['AccountAge', 'MonthlyCharges', 'ViewingHoursPerWeek', 'AverageViewingDuration',
                         'ContentDownloadsPerMonth', 'SupportTicketsPerMonth']])
-    print("After scaling:")
-    print(dataframe.head())
 
     # Add dummies for categorical columns
     dataframe = pd.get_dummies(dataframe,
