@@ -9,11 +9,6 @@ from selenium.webdriver.common.by import By
 def get_browser():
     options = Options()
 
-    # this parameter tells Chrome that
-    # it should be run without UI (Headless)
-    # Uncommment this line if you want to hide the browser.
-    # options.add_argument('--headless=new')
-
     try:
         # initializing webdriver for Chrome with our options
         browser = webdriver.Chrome(options=options)
@@ -33,23 +28,23 @@ time.sleep(3)
 data = browser.find_elements(By.CSS_SELECTOR, ".p--small")
 
 
-def getText(content):
-    innerHtml = content.get_attribute('innerHTML')
+def get_text(content):
+    inner_html = content.get_attribute('innerHTML')
 
     # Beautiful soup allows us to remove HTML tags from our content.
-    soup = BeautifulSoup(innerHtml, features="lxml")
-    rawString = soup.get_text()
+    soup = BeautifulSoup(inner_html, features="lxml")
+    raw_string = soup.get_text()
 
     # Remove hidden carriage returns and tabs.
-    textOnly = re.sub(r"[\n\t]*", "", rawString)
+    text_only = re.sub(r"[\n\t]*", "", raw_string)
     # Replace two or more consecutive empty spaces with '*'
-    textOnly = re.sub('[ ]{2,}', ' ', textOnly)
+    text_only = re.sub('[ ]{2,}', ' ', text_only)
 
-    return textOnly
+    return text_only
 
 
 for i in range(0, len(data)):
-    text = getText(data[i])
+    text = get_text(data[i])
     # date = getText(dates[i])
     print(str(i) + " " + text)
     print("***")  # Go to new line.
