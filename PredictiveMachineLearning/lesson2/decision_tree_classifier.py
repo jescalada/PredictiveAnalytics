@@ -1,10 +1,10 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 import os
+from sklearn.tree import plot_tree
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 PATH = f"{ROOT_PATH}\\..\\datasets\\"
@@ -42,3 +42,14 @@ def show_accuracy_scores(y_test, y_pred):
 
 
 show_accuracy_scores(y_test, y_pred)
+
+fig, ax = plt.subplots(figsize=(20, 10))
+
+plot_tree(classifier.fit(X_train, y_train), max_depth=4, fontsize=4)
+a = plot_tree(classifier,
+              feature_names=['Variance', 'Skewness', 'Kurtosis', 'Entropy'],
+              class_names=["I", "C"],
+              filled=True,
+              rounded=True,
+              fontsize=14)
+plt.show()
