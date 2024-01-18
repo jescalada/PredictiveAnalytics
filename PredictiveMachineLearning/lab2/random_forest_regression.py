@@ -69,3 +69,20 @@ print('Accuracy:', round(accuracy, 2), '%.')
 # Print out the mean square error.
 mse = mean_squared_error(test_labels, predictions)
 print('RMSE:', np.sqrt(mse))
+
+# Get numerical feature importances
+importances = list(rf.feature_importances_)
+
+### FEATURE IMPORTANCE ###
+# Present features and importance scores.
+def show_feature_importances(importances, feature_list):
+    df_importance = pd.DataFrame()
+    for i in range(0, len(importances)):
+        df_importance = df_importance._append({"importance":importances[i],
+                                            "feature":feature_list[i] },
+                                            ignore_index = True)
+
+    df_importance = df_importance.sort_values(by=['importance'],
+                                            ascending=False)
+    print(df_importance)
+show_feature_importances(importances, feature_list)
