@@ -37,11 +37,9 @@ feature_list = list(features.columns)
 # Convert to numpy array
 features = np.array(features)
 
-
 # Split the data into training and testing sets
 train_features, test_features, train_labels, test_labels = \
     train_test_split(features, labels, test_size=0.25, random_state=42)
-
 
 # Instantiate model with 1000 decision trees
 rf = RandomForestRegressor(n_estimators=1000, random_state=42)
@@ -73,16 +71,43 @@ print('RMSE:', np.sqrt(mse))
 # Get numerical feature importances
 importances = list(rf.feature_importances_)
 
-### FEATURE IMPORTANCE ###
+
+# FEATURE IMPORTANCE
 # Present features and importance scores.
+
+
 def show_feature_importances(importances, feature_list):
     df_importance = pd.DataFrame()
     for i in range(0, len(importances)):
-        df_importance = df_importance._append({"importance":importances[i],
-                                            "feature":feature_list[i] },
-                                            ignore_index = True)
+        df_importance = df_importance._append({"importance": importances[i],
+                                               "feature": feature_list[i]},
+                                              ignore_index=True)
 
     df_importance = df_importance.sort_values(by=['importance'],
-                                            ascending=False)
+                                              ascending=False)
     print(df_importance)
+
+
 show_feature_importances(importances, feature_list)
+
+# NEW MODEL WITH MOST IMPORTANT FEATURES
+# New random forest with only the two most important variables
+rf_most_important = RandomForestRegressor(n_estimators=1000, random_state=42)
+
+# Extract the two most important features
+important_indices = [feature_list.index('temp_1'), feature_list.index('average')]
+train_important = train_features[:, important_indices]
+test_important = test_features[:, important_indices]
+
+# Train the random forest
+rf_most_important.fit(train_important, train_labels)
+
+# Make predictions and determine the error
+predictions = rf_most_important.predict(test_important)
+errors = abs(predictions - test_labels)
+
+# Display the performance metrics
+print('Mean Absolute Error:', round(np.mean(errors), 2), 'degrees.')
+mape = np.mean(100 * (errors / test_labels))
+accuracy = 100 - mape
+print('Accuracy:', round(accuracy, 2), '%.')
