@@ -1,8 +1,6 @@
-from sklearn.datasets import make_classification
 from torch import optim
 from skorch import NeuralNetClassifier
 import torch.nn as nn
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import os
@@ -107,3 +105,7 @@ model = build_model(X_train_tensor, y_train_tensor, num_features=4)
 
 # Evaluate the model.
 evaluate_model(model, X_test_tensor, y_test_tensor)
+
+# Get y_true and y_pred for confusion matrix
+y_true = y_test_tensor
+y_pred = model.predict(X_test_tensor)
